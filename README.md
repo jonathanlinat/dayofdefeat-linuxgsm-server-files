@@ -57,6 +57,8 @@ This custom server is based on [LinuxGSM](https://linuxgsm.com/servers/dodserver
 
 * **Next Map Selection Randomizer** (`1.0.0`), Jonathan Linat (https://github.com/jonathanlinat)
    - Aims to randomize the next map selection to enhance variety and player engagement by choosing from a specified map cycle list. Configurable options allow server administrators to exclude recently played maps and customize the map cycle file, ensuring players experience a wide range of environments without repetition.
+* **Server Pause Logger** (`1.0.0`), Jonathan Linat (https://github.com/jonathanlinat)
+   - Allows pausing and unpausing the server, logging the player's name and timestamp for each event.
 * **Stamina Unlimiter** (`1.0.0`), Jonathan Linat (https://github.com/jonathanlinat)
    - Eliminates stamina limitations for players.
 
