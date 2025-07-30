@@ -4,34 +4,31 @@
 #define URL "https://github.com/jonathanlinat"
 
 /*
- * Server Pause Logger
+ * This plugin allows pausing and unpausing the server, logging the player's name and timestamp for each event.
+ * It also logs and announces when pause/unpause is triggered via RCON or the server console.
  *
- * This plugin improves server administration by logging and printing detailed information
- * whenever the server is paused or unpaused using the "amx_pause_and_log" command or the
- * built-in "pause" command (including via RCON or server console).
- * 
- * When a player or the server console pauses or unpauses the server, the plugin records their
- * name (or "RCON/Console"), SteamID (if available), and the exact timestamp of the action.
- * This information is displayed in the server console and logged to the AMXX log file,
- * ensuring clear accountability for server state changes.
- *
- * This functionality is especially useful for competitive or public servers, as it adds
- * transparency to server pauses and unpauses, helping resolve disputes and clarify who
- * initiated the action.
- *
- * Tested and compatible with AMX Mod X v1.10+.
+ * It has been successfully tested with AMX Mod X v1.10+.
  */
 
 #include <amxmodx>
 #include <amxmisc>
 
-new bool:g_Paused = false;
+new g_pause_requester;
+new Float:g_prev_pausable;
+new bool:g_paused;
+new bool:g_pause_allowed;
+new pausable;
 
 public plugin_init() {
     register_plugin(PLUGIN, VERSION, AUTHOR, URL);
 
-    register_concmd("amx_pause_and_log", "cmd_pause", ADMIN_CVAR, "- pause or unpause the game and log");
-    register_clcmd("pause", "cmd_pause_intercept");
+    register_concmd("amx_pauselog", "cmd_pause", ADMIN_CVAR, "- pause or unpause the game with logging");
+    register_clcmd("pauseAck", "cmd_pause_ack");
+
+    register_srvcmd("pause", "cmd_pause_rcon");
+    register_srvcmd("unpause", "cmd_unpause_rcon");
+
+    pausable = get_cvar_pointer("pausable");
 }
 
 public cmd_pause(id, level, cid) {
@@ -39,33 +36,93 @@ public cmd_pause(id, level, cid) {
         return PLUGIN_HANDLED;
     }
 
-    return do_pause_action(id);
-}
+    new name[32];
+    new authid[32];
+    new time_str[32];
 
-public cmd_pause_intercept(id) {
-    return do_pause_action(id);
-}
-
-do_pause_action(id) {
-    new name[32], authid[32], time_str[32];
+    get_user_name(id, name, charsmax(name));
+    get_user_authid(id, authid, charsmax(authid));
     get_time("%Y-%m-%d %H:%M:%S", time_str, charsmax(time_str));
 
-    if (id > 0 && is_user_connected(id)) {
-        get_user_name(id, name, charsmax(name));
-        get_user_authid(id, authid, charsmax(authid));
+    if (pausable != 0) {
+        g_prev_pausable = get_pcvar_float(pausable);
+    }
+
+    set_pcvar_float(pausable, 1.0);
+    g_pause_allowed = true;
+    g_pause_requester = id;
+    client_cmd(id, "pause;pauseAck");
+
+    if (g_paused) {
+        log_amx("UNPAUSE COMMAND: %s <%s> at %s", name, authid, time_str);
+        console_print(id, "[AMXX] UNPAUSE command by %s at %s", name, time_str);
     } else {
-        copy(name, charsmax(name), "RCON/Console");
+        log_amx("PAUSE COMMAND: %s <%s> at %s", name, authid, time_str);
+        console_print(id, "[AMXX] PAUSE command by %s at %s", name, time_str);
+    }
+
+    return PLUGIN_HANDLED;
+}
+
+public cmd_pause_ack(id) {
+    if (!g_pause_allowed) {
+        return PLUGIN_CONTINUE;
+    }
+
+    new name[32];
+    new authid[32];
+    new time_str[32];
+
+    get_time("%Y-%m-%d %H:%M:%S", time_str, charsmax(time_str));
+
+    if (g_pause_requester > 0 && is_user_connected(g_pause_requester)) {
+        get_user_name(g_pause_requester, name, charsmax(name));
+        get_user_authid(g_pause_requester, authid, charsmax(authid));
+    } else {
+        copy(name, charsmax(name), "Console");
         copy(authid, charsmax(authid), "N/A");
     }
 
-    g_Paused = !g_Paused;
+    set_pcvar_float(pausable, g_prev_pausable);
+    g_pause_allowed = false;
+    g_paused = !g_paused;
 
-    if (g_Paused) {
+    if (g_paused) {
         log_amx("Server PAUSED by %s <%s> at %s", name, authid, time_str);
         server_print("[AMXX] Server PAUSED by %s at %s", name, time_str);
+        client_print(0, print_chat, "[AMXX] Server PAUSED by %s at %s", name, time_str);
     } else {
         log_amx("Server UNPAUSED by %s <%s> at %s", name, authid, time_str);
         server_print("[AMXX] Server UNPAUSED by %s at %s", name, time_str);
+        client_print(0, print_chat, "[AMXX] Server UNPAUSED by %s at %s", name, time_str);
+    }
+
+    return PLUGIN_HANDLED;
+}
+
+public cmd_pause_rcon() {
+    new time_str[32];
+    get_time("%Y-%m-%d %H:%M:%S", time_str, charsmax(time_str));
+
+    if (!g_paused) {
+        g_paused = true;
+        log_amx("Server PAUSED by RCON/Console at %s", time_str);
+        server_print("[AMXX] Server PAUSED by RCON/Console at %s", time_str);
+        client_print(0, print_chat, "[AMXX] Server PAUSED by RCON/Console at %s", time_str);
+    }
+
+    return PLUGIN_CONTINUE;
+}
+
+public cmd_unpause_rcon() {
+    new time_str[32];
+    get_time("%Y-%m-%d %H:%M:%S", time_str, charsmax(time_str));
+
+    if (g_paused) {
+        g_paused = false;
+        log_amx("Server UNPAUSED by RCON/Console at %s", time_str);
+        server_print("[AMXX] Server UNPAUSED by RCON/Console at %s", time_str);
+        client_print(0, print_chat, "[AMXX] Server UNPAUSED by RCON/Console at %s", time_str);
     }
 
     return PLUGIN_CONTINUE;
