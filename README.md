@@ -20,11 +20,11 @@ This custom server is based on [LinuxGSM](https://linuxgsm.com/servers/dodserver
 > All the addons and modules are located in the `dodserver/serverfiles/dod/addons/` directory.
 
 * **AMX Mod X** (`1.10.0.5467`, commit `27f451a`), AlliedModders (https://github.com/alliedmodders/amxmodx)
-* **Metamod-r** (`1.3.0.149`, commit `603a257`), ReHLDS (https://github.com/rehlds/Metamod-R)
+* **Metamod-r** (`1.3.3.0`, commit `4db16ff`), ReHLDS (https://github.com/rehlds/Metamod-R)
 * **NetBufExtender** (`1.0`), PRoSToTeM@ (https://cs.rin.ru/forum/viewtopic.php?f=10&t=66907)
-* **ReHLDS** (`3.15.0.866-dev`, commit `1571474`), ReHLDS (https://github.com/rehlds/ReHLDS)
-* **ReAPI** (`5.29.0.345-dev`, commit `66f6096`), ReHLDS (https://github.com/rehlds/reapi)
-* **ReUnion** (`0.2.0.27`, commit `95d3e93`), ReHLDS (https://github.com/rehlds/reunion)
+* **ReHLDS** (`3.15.0.872-dev`, commit `89f17f5`), ReHLDS (https://github.com/rehlds/ReHLDS)
+* **ReAPI** (`5.29.0.348-dev`, commit `5a3cdac`), ReHLDS (https://github.com/rehlds/reapi)
+* **ReUnion** (`0.2.0.34`, commit `59caa7c`), ReHLDS (https://github.com/rehlds/reunion)
 * **VoiceTranscoder** (`2017RC5`, commit `a9ae70b`), WPMGPRoSToTeMa (https://github.com/WPMGPRoSToTeMa/VoiceTranscoder)
 
 ### Third-party AMX Mod X Plugins
