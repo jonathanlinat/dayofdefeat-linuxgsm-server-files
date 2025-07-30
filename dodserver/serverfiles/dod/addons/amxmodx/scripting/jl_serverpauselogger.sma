@@ -5,7 +5,7 @@
 
 /*
  * This plugin allows pausing and unpausing the server, logging the player's name and timestamp for each event.
- * It also logs and announces when pause/unpause is triggered via RCON or the server console.
+ * It also logs and announces when pause/unpause is triggered via the server console.
  *
  * It has been successfully tested with AMX Mod X v1.10+.
  */
@@ -25,9 +25,6 @@ public plugin_init() {
     register_concmd("amx_pauselog", "cmd_pause", ADMIN_CVAR, "- pause or unpause the game with logging");
     register_clcmd("pauseAck", "cmd_pause_ack");
 
-    register_srvcmd("pause", "cmd_pause_rcon");
-    register_srvcmd("unpause", "cmd_unpause_rcon");
-
     pausable = get_cvar_pointer("pausable");
 }
 
@@ -42,7 +39,7 @@ public cmd_pause(id, level, cid) {
 
     get_user_name(id, name, charsmax(name));
     get_user_authid(id, authid, charsmax(authid));
-    get_time("%Y-%m-%d %H:%M:%S", time_str, charsmax(time_str));
+    get_time("%H:%M:%S", time_str, charsmax(time_str));
 
     if (pausable != 0) {
         g_prev_pausable = get_pcvar_float(pausable);
@@ -73,7 +70,7 @@ public cmd_pause_ack(id) {
     new authid[32];
     new time_str[32];
 
-    get_time("%Y-%m-%d %H:%M:%S", time_str, charsmax(time_str));
+    get_time("%H:%M:%S", time_str, charsmax(time_str));
 
     if (g_pause_requester > 0 && is_user_connected(g_pause_requester)) {
         get_user_name(g_pause_requester, name, charsmax(name));
@@ -98,32 +95,4 @@ public cmd_pause_ack(id) {
     }
 
     return PLUGIN_HANDLED;
-}
-
-public cmd_pause_rcon() {
-    new time_str[32];
-    get_time("%Y-%m-%d %H:%M:%S", time_str, charsmax(time_str));
-
-    if (!g_paused) {
-        g_paused = true;
-        log_amx("Server PAUSED by RCON/Console at %s", time_str);
-        server_print("[AMXX] Server PAUSED by RCON/Console at %s", time_str);
-        client_print(0, print_chat, "[AMXX] Server PAUSED by RCON/Console at %s", time_str);
-    }
-
-    return PLUGIN_CONTINUE;
-}
-
-public cmd_unpause_rcon() {
-    new time_str[32];
-    get_time("%Y-%m-%d %H:%M:%S", time_str, charsmax(time_str));
-
-    if (g_paused) {
-        g_paused = false;
-        log_amx("Server UNPAUSED by RCON/Console at %s", time_str);
-        server_print("[AMXX] Server UNPAUSED by RCON/Console at %s", time_str);
-        client_print(0, print_chat, "[AMXX] Server UNPAUSED by RCON/Console at %s", time_str);
-    }
-
-    return PLUGIN_CONTINUE;
 }
