@@ -8,7 +8,7 @@ The server setup follows the procedures outlined in the related [Day of Defeat 1
 
 | 💬 Join an Active Community |
 | -- |
-| [![DoD Game Info](https://dcbadge.vercel.app/api/server/dodcommunity?style=plastic)](https://discord.gg/dodcommunity) |
+| [![DoD Game Info](https://dcbadge.limes.pink/api/server/dodcommunity?style=plastic)](https://discord.gg/dodcommunity) |
 
 ## Features and Architecture
 
